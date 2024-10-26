@@ -1,0 +1,493 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css">
+    <!-- Custom CSS -->
+    {% block headchat %}
+    <style>
+        .text-small {
+            font-size: 0.9rem;
+        }
+
+        .messages-box,
+        .chat-box {
+            height: 490px;
+            overflow-y: scroll;
+        }
+
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+
+        input::placeholder {
+            font-size: 0.9rem;
+            color: #999;
+        }
+        .main-div{
+            position: relative;
+            width: 80%;
+            min-height: 100vh;
+            left: 20%;
+        }
+        .list-group-item.active {
+            background-color : #28a745;
+            border-color: #28a745;
+        }
+        .btn-link {
+            color: #28a745;
+        }
+        .list-search:hover {
+            background-color: #e9ecef;
+            cursor: pointer;
+        }
+        .list-group.borderless .list-group-item {
+            border-top-width: 0;
+            border-bottom-width: 0;
+        }
+        .media1{
+            display: flex;
+            align-items: center;
+        }
+
+        .more-button{
+            cursor:pointer;
+        }
+        .more-button:hover{
+            background-color :#cccccc;
+        }
+        .more-button:hover circle{
+            fill:#666666;
+        }
+        
+    </style>
+    {% endblock %}
+</head>
+<body>
+{% block chat %}
+<div class="main-div" style="height: 100vh;">
+    <div class="container py-3 px-4" style="height: 100%;">
+        <div class="row rounded-lg overflow-hidden shadow" style="height: 100%;">
+          <!-- Users box-->
+          <div style="border-right: 2px solid #e0dcdc;" class="col-5 px-0">
+            <div class="bg-white">
+      
+              <div  class="d-flex justify-content-between bg-gray px-4 py-2 bg-light">
+                <p class="h5 mb-0 py-1">Recent</p>
+                <button id="add-chat" class="btn" data-toggle="modal" data-target="#messageModal"> <i class="fa fa-plus" aria-hidden="true"></i></button>
+              </div>
+      
+              <div class="messages-box">
+                <div class="list-group rounded-0">
+                {% for room_info in user_rooms_info %}
+                  <a id="{{room_info.room_id}}" style="cursor: pointer;" onclick="joinChatRoom('{{room_info.room_id}}')" class="list-group-item list-group-item-action {% if room_info.room_id == room.room_id %}active text-white {% endif %} rounded-0">
+                    {%if room_info.isGroupChat %}
+                    <div class="media"><img src="{{room_info.group_pfp}}" alt="user" width="50" class="rounded-circle">
+                        <div class="media-body ml-4">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <h6 class="mb-0">{{room_info.participants_last_names}} </h6><small data-created-at="{{room_info.last_message_created_at}}" class="small font-weight-bold time_of_messages_group">{%if room_info.last_message_created_at is None %} {%else%}{{ room_info.last_message_created_at|timesince}} ago{% endif %}</small>
+                            </div>
+                            <p class="font-italic mb-0 text-small textToResize">
+                                {%if room_info.last_message_body is None %}
+                                 * Send your first message * 
+                                {%elif room_info.last_message_created_by == request.user %}
+                                  You : {{ room_info.last_message_body }}
+                                {% else %}
+                                {{room_info.last_message_created_by}} : {{ room_info.last_message_body }}
+                                {%endif%}</p>
+                            </div>
+                        </div>
+                    {%else%}
+                    <div class="media"><img src="{{room_info.second_participant_profile_pic}}" alt="user" width="50" class="rounded-circle">
+                      <div class="media-body ml-4">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                          <h6 class="mb-0">{{ room_info.second_participant_first_name }} {{ room_info.second_participant_last_name }} </h6><small data-created-at="{{room_info.last_message_created_at}}" class="small font-weight-bold time_of_messages_group">{%if room_info.last_message_created_at is None %} {%else%}{{ room_info.last_message_created_at|timesince}} ago{% endif %}</small>
+                        </div>
+                        <p class="font-italic mb-0 text-small textToResize">
+                            {%if room_info.last_message_body is None %}
+                             * Send your first message * 
+                            {%elif room_info.last_message_created_by == request.user %}
+                              You : {{ room_info.last_message_body }}
+                            {% else %}
+                            {{ room_info.last_message_body }}
+                            {%endif%}</p>
+                      </div>
+                    </div>
+                    {%endif%}
+                  </a>
+                  {% empty %}
+                    
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Chat Box-->
+          {%block messaging%}
+          <div class="col-7 px-0 d-flex justify-content-center align-items-center">
+            <div class="container center-content">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <h2 class="card-title">Your Messages</h2>
+                        <p>Start discussions with your friends.</p>
+                        <button id="sendMessageBtn" class="btn btn-success btn-lg shadow-sm rounded-pill" data-toggle="modal" data-target="#messageModal">Send Message</button>
+                    </div>
+                </div>
+            </div>
+          </div>
+          {% endblock %}
+        
+            <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+                    <div class="modal-content rounded-card">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="messageModalLabel">New message</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                        <div class="d-flex">
+                            <span class="pr-2 mt-2">To:</span><input type="text" class="form-control rounded-pill" id="SearchUser" placeholder="Search...">
+                        </div>
+                        <!--<p class="mt-3">No account found.</p>-->
+                        <ul id="userList" class="list-group list-group-flush borderless mt-2 list-group-no-padding">
+                            {% for allUser in allUsers %}
+                            <li style="padding-top:0; padding-bottom: 0;" class="list-group-item"> 
+                                <div style="border-bottom:none" class="suggestion-user" onclick="selectUser('{{allUser.username}}')">
+                                    <span>
+                                        <div class="small-profilepic mt-1 mr-1" style="background-image: url(/media/{{allUser.profile_pic}})"></div>
+                                    </span>
+                                    <div class="user-details mt-1 ml-2">
+                                        <span>
+                                            <div id="user-name">
+                                                
+                                                <strong>
+                                                    {{allUser.first_name}} {{allUser.last_name}}
+                                                </strong>
+                                            </div>
+                                            <div class="grey">@{{allUser.username}}</div>
+                                        </span>
+                                    </div>
+                                </div>
+                            </li>
+                                {% empty %}
+                                <p class="mt-3">No account found.</p>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                            <div class="selectedUsers">
+
+                            </div>
+                            <button type="button" class="btn btn-success rounded-pill" onclick="createChatRoom()">Chat</button>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+      </div>
+</div>
+
+<!-- Bootstrap JS and Popper.js -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+{% block right_%}
+{% endblock %}
+{% block scripts%}
+{% endblock %}
+
+<script>
+    //Variables
+    
+    let chatName = "";
+    let chatSocket = null;
+    let chatWindowUrl = window.location.href;
+    let chatRoom_ID = "";
+    let selectedUsers = [];
+
+    const chatMessageSubmit = document.querySelector('#submitMessage');
+    const chat_message_input = document.querySelector('#chatToSend');
+    const messagesDiv = document.querySelector("#messagesDiv");
+
+
+    
+
+    //Functions 
+    const SearchUser = document.querySelector('#SearchUser');
+    const userList = document.querySelector('#userList');
+    resizeText();
+    updateTimeForMessages('.time_of_messages_group');
+    setInterval(function() {
+        updateTimeForMessages('.time_of_messages_group');
+    }, 60 * 1000);
+    
+    //------------------------ to search users in chat ---------------------------//
+    
+    SearchUser.addEventListener('input', function(event) {
+        const query = event.target.value.trim(); // Get the search query
+        fetch(`/search_users/?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+            // Update user list based on filtered data or show message if no users found
+            if (data.length === 0) {
+                userList.innerHTML = '<li>No users found.</li>';
+            } else {
+                userList.innerHTML = ''; // Clear the user list
+                data.forEach(user => {
+                userList.innerHTML += 
+                `<li style="padding-top:0; padding-bottom: 0;" class="list-group-item"> 
+                                        <div style = "border-bottom:none" class="suggestion-user" onclick="selectUser('${user.username}')">
+                                            <span>
+                                                <div class="small-profilepic" style="background-image: url(${user.profile_pic})"></div>
+                                            </span>
+                                            <div class="user-details">
+                                                <span>
+                                                    <div id="user-name">
+                                                        <strong>
+                                                            ${user.first_name} ${user.last_name}
+                                                        </strong>
+                                                    </div>
+                                                    <div class="grey">@${user.username}</div>
+                                                </span>
+                                            </div>
+                                        </div>`;
+                });
+            }
+            })
+            .catch(error => {
+            console.error('Error fetching data:', error);
+            });
+        });
+
+    function resizeText() {
+        const elementsToResize = document.querySelectorAll('.textToResize');
+        
+        elementsToResize.forEach(element => {
+            const maxLength = 27; // Set the maximum length before truncation
+            let text = element.textContent.trim();
+        
+            // Check if the text exceeds the maximum length
+            if (text.length > maxLength) {
+            // Truncate the text and add ellipsis
+            text = text.slice(0, maxLength) + '...';
+            }
+        
+            // Set the modified text content
+            element.textContent = text;
+            // Add additional resizing logic if needed (e.g., adjusting font size)
+            // element.style.fontSize = '16px'; // Example of changing font size
+        });
+        }
+        
+        // Call the function to resize the text when needed
+    function selectUser(id){
+        if(selectedUsers.filter(item => item == id).length===0){
+        selectedUsers = [...selectedUsers,id];
+        selectedUsersElement = document.querySelector(".selectedUsers");
+        selectedUsersElement.innerHTML += 
+        `<h6 data-selectedUser="${id}" style="background-color: #e1f1fe; color:#30a8f8 ; cursor:pointer" class="badge badge-pill mr-1" onclick='unselect_user(this,"${id}")'>@${id} <i class="fas fa-times" style="color: #30a8f8;"></i></h6>`
+        }
+    }
+    function unselect_user(element,id){
+        selectedUsers.filter(item => item != id);
+        element.remove();
+    }
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    async function createChatRoom(){
+        chatRoom_ID= Math.random().toString(36).slice(2,12);
+        
+        const data = new FormData();
+        data.append('url',chatWindowUrl);
+        data.append('receiver',selectedUsers);
+        await fetch(`/api/create-room/${chatRoom_ID}/`, {
+            method : 'POST',
+            headers : {
+                'X-CSRFToken' : getCookie('csrftoken')
+            },
+            body : data
+        })
+        .then( function(res) {
+            return res.json()
+
+        })
+        .then( function(data){
+            selectedUsers = []
+            document.querySelector(".selectedUsers").innerHTML="";
+            newRoomId = data.room_id
+            window.location.href = `/n/chatting/${newRoomId}/`
+        })
+    }
+
+    function sendMessage() {
+        chatSocket.send(JSON.stringify({
+            'type': 'message',
+            'message': chat_message_input.value,
+        }))
+        chat_message_input.value = ''
+    }
+
+    async function onChatMessage (data){
+        console.log("onChatMessage",data);
+        currentUser = await getCurrentUser();
+        if (data.type == "chat_message"){
+            if (data.current_user == currentUser.username) {
+                messagesDiv.innerHTML += 
+                    `<div class="media w-50 ml-auto mb-3">
+                <div class="media-body">
+                  <div class="bg-success rounded py-2 px-3 mb-2">
+                    <p class="text-small mb-0 text-white">${data.message}</p>
+                  </div>
+                  <p class="small text-muted">${data.created_at} ago</p>
+                </div>
+              </div>`
+            }
+            else {
+                messagesDiv.innerHTML += 
+                `<div class="media w-50 mb-3"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
+                <div class="media-body ml-3">
+                  <div class="bg-light rounded py-2 px-3 mb-2">
+                    <p class="text-small mb-0 text-muted">${data.message}</p>
+                  </div>
+                  <p class="small text-muted">${data.created_at} ago</p>
+                </div>
+              </div>`
+            }
+        }
+    }
+
+    async function getCurrentUser() {
+        try {
+            const response = await fetch('/get-current-user/');
+            if (!response.ok) {
+                throw new Error('Failed to fetch user data');
+            }
+
+            const data = await response.json();
+            console.log("MY DATA IS : ", data);
+            return data;
+        } catch (error) {
+            console.error('Error fetching current user:', error);
+            throw error;
+        }
+    }
+
+    function joinChatRoom(id) {
+        const baseUrl = 'http://127.0.0.1:8000/n/';
+        window.location.href = `${baseUrl}chatting/${id}/`;
+    }
+
+    chatMessageSubmit.onclick = function(e) {
+        console.log('i got here');
+        e.preventDefault();
+        sendMessage();
+    }
+    function parseDate(dateString) {
+        console.log(dateString);
+        const iso8601Pattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+        if (iso8601Pattern.test(dateString)){
+            console.log(dateString);
+            return dateString;
+        }
+        else {
+            const parts = dateString.split(/[\s,]+/);
+            const months = {
+                'Jan.': '01', 'Feb.': '02', 'Mar.': '03', 'Apr.': '04',
+                'May': '05', 'Jun.': '06', 'Jul.': '07', 'Aug.': '08',
+                'Sep.': '09', 'Oct.': '10', 'Nov.': '11', 'Dec.': '12'
+            };
+
+            const day = parts[1].padStart(2, '0'); // Ensure two-digit day
+            const month = months[parts[0]];
+            const year = parts[2];
+            const time = parts[3];// Get time and AM/PM
+
+            // Convert 12-hour time to 24-hour time format
+            const [hour, minute] = time.split(':');
+            let hours = parseInt(hour);
+            if (parts[4].toLowerCase() === 'p.m.' && hours < 12) {
+                hours += 12;
+            }
+            const formattedTime = `${hours.toString().padStart(2, '0')}:${minute}`;
+            const formattedDate = `${year}-${month}-${day}T${formattedTime}:00`;
+            return formattedDate;
+        }
+    }
+
+    function updateTimeForMessages(divID) {
+        //Getting All the time of messages
+        const windowhere = 'http://127.0.0.1:8000/n/chatting'
+        if (window.location.href === windowhere) {
+            const timeOfMessages = document.querySelectorAll(divID);
+            console.log(timeOfMessages);
+            //Iterrating through every message
+            timeOfMessages.forEach(function(messageElement) {
+                //getting the dataset value from the element
+                const createdAtString = messageElement.dataset.createdAt;
+                if (createdAtString!=='None'){
+                    //Formating the date that we got to a date understandable by JS
+                    const formattedDate = parseDate(createdAtString);
+                    console.log(formattedDate);
+                    //Creating a new Date Object for the time we want to update
+                    const parsedDate = new Date(formattedDate).getTime();
+                    //Creating a new date object for the current Time
+                    const currentTime = new Date().getTime();
+
+                    function updateTimeDisplay() {
+                        const currentTime = new Date().getTime();
+                        // console.log('currentTime :',currentTime)
+                        // console.log('parsedDate :',parsedDate)
+                        var timeDifference = currentTime - parsedDate;
+                        // console.log('timeDifference :',timeDifference)
+
+
+                        const elapsedMinutes = Math.floor(timeDifference / (1000 * 60));
+                        const elapsedHours = Math.floor(elapsedMinutes / 60);
+                        const elapsedDays = Math.floor(elapsedHours / 24);
+                        if (elapsedDays >= 1) {
+                            messageElement.textContent = elapsedDays + ' day' + (elapsedDays > 1 ? 's' : '') + ' ago';
+                        } else if (elapsedHours >= 1) {
+                            messageElement.textContent = elapsedHours + ' hour' + (elapsedHours > 1 ? 's' : '') + ' ago';
+                        } else {
+                            messageElement.textContent = elapsedMinutes + ' minute' + (elapsedMinutes !== 1 ? 's' : '') + ' ago';
+                        }
+                    }
+                    updateTimeDisplay();
+                }
+                });
+        }
+    }
+    setInterval(function() {
+            console.log("triggered");
+            updateTimeForMessages('.time_of_messages');
+            updateTimeForMessages('.time_of_messages_group');
+            }, 60 * 1000);
+
+    
+</script>
+{% endblock %}
+</body>
+    
+</html>

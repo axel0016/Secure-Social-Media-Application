@@ -1,0 +1,563 @@
+{% extends "chat/partials/chat_page.html" %}
+{% load static %}
+
+{%block messaging%}
+<div class="col-7 px-0 d-flex flex-column justify-content-between">
+    {%if room.isGroupChat %}
+    <div  style="border-bottom: 2px solid #e0dcdc;" class="d-flex justify-content-between bg-gray px-4 py-2 bg-light">
+        <div class="media1"><img src="{{groupImagepfp}}" alt="user" width="37" class="rounded-circle">
+            <div class="media-body ml-3">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                    <h6 class="mb-0">{{participants_inRoom_last_names}}</h6>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center align-items-center">
+            <i class="fas fa-info-circle fa-lg mr-3" style="cursor:pointer" data-toggle="modal" data-target="#exampleModal"></i>
+        </div>
+    </div>
+    {%else%}
+    <div  style="border-bottom: 2px solid #e0dcdc;" class="d-flex justify-content-between bg-gray px-4 py-2 bg-light">
+        <div class="media1"><img src="/media/{{second_user.profile_pic}}" alt="user" width="37" class="rounded-circle">
+            <div class="media-body ml-3">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                    <h6 class="mb-0">{{second_user.first_name}} {{second_user.last_name}}</h6>
+              </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center align-items-center" onclick="toProfile('{{second_user.username}}')">
+            <i class="fas fa-user-circle fa-lg mr-3" style="cursor:pointer"></i>
+        </div>
+    </div>
+    {%endif%}
+    <div id="messagesDiv" class="px-4 pt-5 chat-box bg-white">
+    {% for message in room_messages %}
+      <!-- Sender Message-->
+      {% if message.created_by == request.user %}
+      <div id="{{message.id}}" class="media w-50 ml-auto mb-3 justify-content-end" data-is-me="me">
+        <div class="media-body">
+            <div class="d-flex justify-content-end">
+                <div style="display:flex;justify-content: center; align-items: center;" class="dropleft mr-2">
+                    <svg class="rounded-circle dropdown-toggle more-button" data-toggle="dropdown" height="22px" viewBox="0 0 22 22" width="22px"><circle cx="11" cy="6" fill="#a3a3a3" r="2" stroke-width="1px"></circle><circle cx="11" cy="11" fill="#a3a3a3" r="2" stroke-width="1px"></circle><circle cx="11" cy="16" fill="#a3a3a3" r="2" stroke-width="1px"></circle></svg>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <div style="cursor: pointer;" class="dropdown-item" onclick="deleteMessage('{{message.id}}')" > <svg class="pt-1" xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2023 Fonticons, Inc.--><path fill="#c83232" d="M32 464a48 48 0 0 0 48 48h288a48 48 0 0 0 48-48V128H32zm272-256a16 16 0 0 1 32 0v224a16 16 0 0 1 -32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1 -32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1 -32 0zM432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.7 23.7 0 0 0 -21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0 -16-16z"/></svg> Delete Message</div>
+                    </div>
+                </div>
+                <div style="max-width: 17em; overflow-wrap: break-word;" class="bg-success rounded py-2 px-3">
+                    <p class="text-small mb-0 text-white ">{{message.body}}</p>
+                </div>
+            </div>
+          <p  style="text-align: right; font-size:70%" data-created-at="{{message.created_at}}" class="small text-muted time_of_messages ml-4 mt-1 ">{{message.created_at|timesince}} ago</p>
+        </div>
+      </div>
+      {% else %}
+      <div id="{{message.id}}" class="media w-50 mb-3 align-items-center" data-is-me="{{message.created_by.last_name}}"><img src="/media/{{message.created_by.profile_pic}}" alt="user" width="50" class="rounded-circle">
+        <div class="media-body ml-3">
+            <p style="font-size:78%" class="text-muted mb-0">{{message.created_by.first_name}} {{message.created_by.last_name}} </p>
+            <div class="d-flex">
+                <div class="bg-light rounded py-2 px-3 " style="max-width: 17em; overflow-wrap: break-word;" >
+                    <p class="text-small mb-0 text-muted">{{message.body}}</p>
+                </div>
+            </div>
+          <p style="font-size:70%" data-created-at="{{message.created_at}}" class="small text-muted time_of_messages mt-1 mb-0">{{message.created_at|timesince}} ago</p>
+        </div>
+      </div>
+      {% endif %}
+      {% empty %}
+      <div class="mt-5 d-flex justify-content-center flex-column" id="lets-empty">
+          <svg style="fill:#e0dcdc" xmlns="http://www.w3.org/2000/svg" height="6em" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M448 0H64C28.7 0 0 28.7 0 64v288c0 35.3 28.7 64 64 64h96v84c0 7.1 5.8 12 12 12 2.4 0 4.9-.7 7.1-2.4L304 416h144c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64zm16 352c0 8.8-7.2 16-16 16H288l-12.8 9.6L208 428v-60H64c-8.8 0-16-7.2-16-16V64c0-8.8 7.2-16 16-16h384c8.8 0 16 7.2 16 16v288z"/></svg>
+          <p style="color :#C9C6C6 " class="text-center mt-2 font-weight-bold" >No messages yet</p>
+          <p style="color :#C9C6C6 " class="text-center mt-2 px-2 font-weight-bold" >After you send your first message, it will appear here.</p>
+      </div>
+      {% endfor %}
+      
+      <!-- Modal -->
+    
+</div>
+    
+    <!-- Typing area -->
+    <div class="formm">
+        <form action="#" class="bg-light">
+            <div class="input-group">
+                <input type="text" placeholder="Type a message" aria-describedby="button-addon2" class="form-control rounded-0 border-0 py-4 bg-light" id="chatToSend" autocomplete="off">
+                <div class="input-group-append">
+                    <button id="submitMessage" type="submit" class="btn btn-link"> <i class="fa fa-paper-plane"></i></button>
+                </div>
+          </div>
+        </form>
+    </div>
+    
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div style="max-width:400px;margin:auto" class="modal-dialog modal-dialog-scrollable"  role="document">
+        <div class="modal-content">
+            <div style="border-bottom:none" class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Group Chat Info</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div style="border-bottom : 2px solid #e6ecf0" class="d-flex justify-content-center align-items-center flex-column">
+                    <img src="{{groupImagepfp}}" alt="user" width="50" class="rounded-circle">
+                    <h6 class="mt-3">{{participants_inRoom_last_names}}</h6>
+                    <div class="d-flex mt-2 mb-3">
+                        <button style="background-color: #e1f1fe; color:#30a8f8; border-radius:20px" type="button" class="btn btn-sm mr-2" onclick="showInputImage()">Change Image <i class="far fa-image"></i></button>
+                        <button style="background-color: #e1f1fe; color:#30a8f8; border-radius:20px" type="button" class="btn btn-sm ml-2" onclick="showInputName()">Change Name <i class="fas fa-edit"></i></button>
+                    </div>
+                    <div style="display:none" class="form-group" id="inputGroupeImage">
+                        <div class="custom-file">
+                            <input id="fileInput" type="file" name="profile" class="form-control custom-file-input" accept="image/jpeg,image/png,image/webp,image/gif" data-focusable="true" aria-describedby="inputGroupFileAddon01" onchange="displayFileName(this)">
+                            <label id="fileLabel" class="custom-file-label" for="fileInput"><span style="color: #6c757d;">Choose Group Picture<span></label>
+                            <span class="star small"></span>
+                        </div>
+                    </div>
+                    <div style="display:none" class="form-group" id="inputGroupName">
+                        <input id="nameInput" class="form-control inp usrname" type="text" name="username" placeholder="Group Chat Name" autocomplete="off" onkeyup="showSubmitButtons(this)">
+                    </div>
+                    <div style="display:none" class="justify-content-between mb-3 buttons-change">
+                        <button style="border-radius:5px; background-color : #f5cdd0; color : #f83030" type="button" class="btn btn-sm mr-3" onclick="hideSubmitButtons()">Cancel Changes</button>
+                        <button style="border-radius:5px; background-color : #e1f1fe; color : #30a8f8" type="button" class="btn btn-sm ml-3" onclick="changeGroupDetails()">Submit Changes</button>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h6 class="text-center mb-0">Chat Members</h6>
+                </div>
+                <ul class="list-group list-group-flush mt-2">
+                    {%for participant in room.participants.all %}
+                    <li style="border-bottom:none" class="list-group-item py-0 px-1" onclick="toProfile('{{participant.username}}')"> 
+                        <div style="border-bottom:none" class="suggestion-user pt-0">
+                            <span>
+                                <div class="small-profilepic mt-1 mr-1" style="background-image: url(/media/{{participant.profile_pic}})"></div>
+                            </span>
+                            <div class="user-details mt-1 ml-2">
+                                <span>
+                                    <div id="user-name">
+                                        <strong>
+                                           {{participant.first_name}} {{participant.last_name}}
+                                        </strong>
+                                    </div>
+                                    <div class="grey">@{{participant.username}}</div>
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-center align-items-center">
+                                <span class="badge badge-primary">Visit Profile</span>
+                            </div>
+                        </div>
+                    </li>
+                    {%endfor%}
+                  </ul>
+            </div>
+        </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{%block scripts%}
+{{ room.room_id|json_script:"room_id"}}
+<script>
+    let chatSocket = null;
+    const chatRoom = document.querySelector("#room_id").textContent.replaceAll('"','');
+    console.log(chatRoom);
+    const messagesDiv = document.querySelector("#messagesDiv");
+    //this is to autoscroll down : 
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    //
+    const chatToSend = document.querySelector("#chatToSend");
+    const submitMessage = document.querySelector("#submitMessage");
+    chatSocket = new WebSocket(`ws://${window.location.host}/ws/${chatRoom}/`);
+    selectedUsers = []
+
+    function showInputImage(){
+        inputImage = document.getElementById("inputGroupeImage");
+        if (inputImage.style.display === 'none') {
+            inputImage.style.display = 'block'; // Show the element
+          } else {
+            inputImage.style.display = 'none'; // Hide the element
+          }
+    }
+    function showInputName(){
+        inputName = document.getElementById("inputGroupName");
+        if (inputName.style.display === 'none') {
+            inputName.style.display = 'block'; // Show the element
+          } else {
+            inputName.style.display = 'none'; // Hide the element
+          }
+    }
+    function displayFileName(input) {
+        const fileLabel = document.getElementById('fileLabel');
+        buttons_change = document.querySelector(".buttons-change");
+        console.log(fileLabel)
+        if (input.files.length > 0) {
+          fileLabel.textContent = input.files[0].name;
+          buttons_change.style.display="block"
+        } else {
+          fileLabel.textContent = 'Choose Group Picture';
+        }
+    }
+    function showSubmitButtons(element){
+        buttons_change = document.querySelector(".buttons-change");
+        if(element.value.trim() === ''){
+
+        } else {
+            buttons_change.style.display="block"
+        }
+    }
+    function hideSubmitButtons(){
+        document.getElementById("fileInput").value="";
+        document.getElementById("nameInput").value="";
+        document.getElementById('fileLabel').textContent = 'Choose Group Picture';
+        document.getElementById("inputGroupeImage").style.display="none";
+        document.getElementById("inputGroupName").style.display="none";
+        document.querySelector(".buttons-change").style.display="none";
+    }
+
+    function selectUser(id){
+        if(selectedUsers.filter(item => item == id).length===0){
+        selectedUsers = [...selectedUsers,id];
+        selectedUsersElement = document.querySelector(".selectedUsers");
+        selectedUsersElement.innerHTML += 
+        `<h6 data-selectedUser="${id}" style="background-color: #e1f1fe; color:#30a8f8 ; cursor:pointer" class="badge badge-pill mr-1" onclick='unselect_user(this,"${id}")'>@${id} <i class="fas fa-times" style="color: #30a8f8;"></i></h6>`
+        }
+    }
+    function unselect_user(element,id){
+        selectedUsers.filter(item => item != id);
+        element.remove();
+    }
+
+    chatSocket.onmessage = function(e) {
+        console.log('on message');
+
+        onChatMessage(JSON.parse(e.data))
+    }
+
+    chatSocket.onopen = function(e) {
+        console.log('on open');
+    }
+
+    chatSocket.onclose = function(e) {
+        console.log('closed chat socket');
+    }
+
+    async function changeGroupDetails(){
+        ThisHref = window.location.href
+        fileInput = document.getElementById("fileInput");
+        nameInput = document.getElementById("nameInput");
+        
+        const data = new FormData();
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            data.append('myfile', file);
+        }
+        if (nameInput.value.trim() !== ''){
+            const nameGroup = nameInput.value;
+            data.append('groupName',nameGroup)
+        }
+        data.append('room_id',chatRoom);
+        await fetch('http://127.0.0.1:8000/api/updateGroupDetails/', {
+            method : 'POST',
+            headers : {
+                'X-CSRFToken' : getCookie('csrftoken')
+            },
+            body : data
+        })
+        .then( function(res) {
+            return res.json()
+
+        })
+        .then( function(data){
+            document.getElementById("fileInput").value="";
+            document.getElementById("nameInput").value="";
+            document.getElementById('fileLabel').textContent = 'Choose Group Picture';
+            console.log('data',data)
+            window.location.href = `${ThisHref}`;
+        })
+    }
+
+    async function onChatMessage (data){
+        console.log("onChatMessage",data);
+        toEmptyDiv = document.querySelector("#lets-empty");
+        //Getting The room id to change the left messages
+        MessageDiv = document.getElementById(`${chatRoom}`);
+        currentUser = await getCurrentUser();
+        if (toEmptyDiv!=null)
+            toEmptyDiv.remove();
+        if (data.type == "chat_message"){
+            if (data.current_user == currentUser.username) {
+                messagesDiv.innerHTML += 
+                    `<div id="${data.message_id}" class="media w-50 ml-auto mb-3 justify-content-end" data-is-me="me">
+                        <div class="media-body">
+                            <div class="d-flex justify-content-end">
+                                <div style="display:flex;justify-content: center; align-items: center;" class="dropleft mr-2">
+                                    <svg class="rounded-circle dropdown-toggle more-button" data-toggle="dropdown" height="22px" viewBox="0 0 22 22" width="22px"><circle cx="11" cy="6" fill="#a3a3a3" r="2" stroke-width="1px"></circle><circle cx="11" cy="11" fill="#a3a3a3" r="2" stroke-width="1px"></circle><circle cx="11" cy="16" fill="#a3a3a3" r="2" stroke-width="1px"></circle></svg>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <div style="cursor: pointer;" class="dropdown-item" onclick="deleteMessage('${data.message_id}')" > <svg class="pt-1" xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2023 Fonticons, Inc.--><path fill="#c83232" d="M32 464a48 48 0 0 0 48 48h288a48 48 0 0 0 48-48V128H32zm272-256a16 16 0 0 1 32 0v224a16 16 0 0 1 -32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1 -32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1 -32 0zM432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.7 23.7 0 0 0 -21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0 -16-16z"/></svg> Delete Message</div>
+                                    </div>
+                                </div>
+                                <div style="max-width: 17em; overflow-wrap: break-word;" class="bg-success rounded py-2 px-3">
+                                    <p class="text-small mb-0 text-white ">${data.message}</p>
+                                </div>
+                            </div>
+                            <p style="text-align: right; font-size:70%" data-created-at="${data.created_at_no_timesince}" class="small text-muted time_of_messages ml-4 mt-1">${data.created_at} ago</p>
+                        </div>
+                    </div>`;
+              
+              MessageDiv.children[0].children[1].children[1].innerText = `You : ${data.message}`;
+              MessageDiv.children[0].children[1].children[0].children[1].setAttribute('data-created-at',`${data.created_at_no_timesince}`);
+              MessageDiv.children[0].children[1].children[0].children[1].innerText = `${data.created_at} ago`;
+
+            }
+            
+            else {
+                console.log(data.second_user_image); //-------------->
+                messagesDiv.innerHTML += 
+                `<div id="${data.message_id}" class="media w-50 mb-3 align-items-center" data-is-me="${data.last_name}"><img src="${data.second_user_image}" alt="user" width="50" class="rounded-circle">
+                    <div class="media-body ml-3">
+                        <p style="font-size:78%" class="text-muted mb-0">${data.first_name} ${data.last_name} </p>
+                        <div class="d-flex">
+                            <div style="max-width: 17em; overflow-wrap: break-word;" class="bg-light rounded py-2 px-3">
+                                <p class="text-small mb-0 text-muted">${data.message}</p>
+                            </div>
+                        </div>
+                  <p style="font-size:70%" data-created-at="${data.created_at_no_timesince}" class="small text-muted time_of_messages mt-1">${data.created_at} ago</p>
+                </div>
+              </div>`;
+              MessageDiv.children[0].children[1].children[1].innerText = `${data.last_name} : ${data.message}`; //--------------->
+              MessageDiv.children[0].children[1].children[0].children[1].setAttribute('data-created-at',`${data.created_at_no_timesince}`);
+              MessageDiv.children[0].children[1].children[0].children[1].innerText = `${data.created_at} ago`;
+            }
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            MessageDiv = document.getElementById(`${chatRoom}`);
+            parentOfMessageDiv = MessageDiv.parentNode;
+            MessageDiv.parentNode.removeChild(MessageDiv);
+            parentOfMessageDiv.insertBefore(MessageDiv, parentOfMessageDiv.firstChild);
+        }
+
+        if(data.type == "deleted_Message"){
+            elementToDelete = document.getElementById(data.message_id)
+                if (elementToDelete == messagesDiv.lastElementChild) {
+                    console.log(elementToDelete)
+                    elementToDelete.remove();
+                    newLastElement = messagesDiv.lastElementChild;
+                    console.log(newLastElement);
+                    if(newLastElement == null){
+                        MessageDiv.children[0].children[1].children[1].innerText = "* Send your first message *";
+                        MessageDiv.children[0].children[1].children[0].children[1].setAttribute('data-created-at','');
+                        MessageDiv.children[0].children[1].children[0].children[1].innerText = '';
+                    } else {
+                        MineOrNot = newLastElement.getAttribute('data-is-me');
+                        if (MineOrNot == 'me'){
+                            newestLatestMessage = newLastElement.children[0].children[0].children[1].children[0].innerText;
+                            newestLatestMessageTime = newLastElement.children[0].children[1].innerText;
+                            newestLatestMessageTimestamp = newLastElement.children[0].children[1].getAttribute('data-created-at');
+                            MessageDiv.children[0].children[1].children[1].innerText = `You : ${newestLatestMessage}`;
+                            MessageDiv.children[0].children[1].children[0].children[1].setAttribute('data-created-at',`${newestLatestMessageTimestamp}`);
+                            MessageDiv.children[0].children[1].children[0].children[1].innerText = `${newestLatestMessageTime}`;
+                        } else {
+                            newestLatestMessage = newLastElement.children[1].children[1].children[0].innerText;
+                            newestLatestMessageTime = newLastElement.children[1].children[2].innerText
+                            newestLatestMessageTimestamp = newLastElement.children[1].children[2].getAttribute('data-created-at');
+                            MessageDiv.children[0].children[1].children[1].innerText = `${MineOrNot} : ${newestLatestMessage}`; //-------------->
+                            MessageDiv.children[0].children[1].children[0].children[1].setAttribute('data-created-at',`${newestLatestMessageTimestamp}`);
+                            MessageDiv.children[0].children[1].children[0].children[1].innerText = `${newestLatestMessageTime}`;
+                        }   
+                    }
+                } else {
+                    elementToDelete.remove();
+                }
+        }
+        resizeText();
+    }
+    
+    function toProfile(id){
+        window.location.href = `http://127.0.0.1:8000/${id}`
+    }
+
+    async function getCurrentUser() {
+        try {
+            const response = await fetch('/get-current-user/');
+            if (!response.ok) {
+                throw new Error('Failed to fetch user data');
+            }
+
+            const data = await response.json();
+            console.log("MY DATA IS : ", data);
+            return data;
+        } catch (error) {
+            console.error('Error fetching current user:', error);
+            throw error;
+        }
+    }
+
+    function sendMessage() {
+        chatSocket.send(JSON.stringify({
+            'type': 'message',
+            'message': chatToSend.value,
+        }))
+        chatToSend.value = ''
+    }
+
+    function deleteMessage(message_id){
+        chatSocket.send(JSON.stringify({
+            'type': 'delete_message',
+            'message_id':message_id
+        }))
+    }
+
+
+    submitMessage.onclick = function(e) {
+        e.preventDefault();
+        sendMessage();
+    }
+
+    function joinChatRoom(id) {
+        const baseUrl = 'http://127.0.0.1:8000/n/';
+        window.location.href = `${baseUrl}chatting/${id}/`;
+    }
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    async function createChatRoom(id){
+        chatRoom_ID= Math.random().toString(36).slice(2,12);
+        const data = new FormData();
+        const chatWindowUrl = window.location.href
+        data.append('url',chatWindowUrl);
+        data.append('receiver',selectedUsers);
+        await fetch(`/api/create-room/${chatRoom_ID}/`, {
+            method : 'POST',
+            headers : {
+                'X-CSRFToken' : getCookie('csrftoken')
+            },
+            body : data
+        })
+        .then( function(res) {
+            return res.json()
+
+        })
+        .then( function(data){
+            selectedUsers = []
+            console.log('data',data)
+            document.querySelector(".selectedUsers").innerHTML="";
+            newRoomId = data.room_id;
+            const baseUrl = 'http://127.0.0.1:8000/n/';
+            window.location.href = `${baseUrl}chatting/${newRoomId}/`;
+        })
+    }
+
+    function parseDate(dateString) {
+        console.log(dateString);
+        const iso8601Pattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+        if (iso8601Pattern.test(dateString)){
+            console.log(dateString);
+            return dateString;
+        }
+        else {
+            const parts = dateString.split(/[\s,]+/);
+            const months = {
+                'Jan.': '01', 'Feb.': '02', 'Mar.': '03', 'Apr.': '04',
+                'May': '05', 'Jun.': '06', 'Jul.': '07', 'Aug.': '08',
+                'Sep.': '09', 'Oct.': '10', 'Nov.': '11', 'Dec.': '12'
+            };
+
+            const day = parts[1].padStart(2, '0'); // Ensure two-digit day
+            const month = months[parts[0]];
+            const year = parts[2];
+            const time = parts[3];// Get time and AM/PM
+
+            // Convert 12-hour time to 24-hour time format
+            const [hour, minute] = time.split(':');
+            let hours = parseInt(hour);
+            if (parts[4].toLowerCase() === 'p.m.' && hours < 12) {
+                hours += 12;
+            }
+            const formattedTime = `${hours.toString().padStart(2, '0')}:${minute}`;
+            const formattedDate = `${year}-${month}-${day}T${formattedTime}:00`;
+            return formattedDate;
+        }
+    }
+
+    function updateTimeForMessages(divID) { //---------------------->
+        //Getting All the time of messages
+        console.log("I got here");
+        const timeOfMessages = document.querySelectorAll(divID);
+        console.log(timeOfMessages);
+        //Iterrating through every message
+        timeOfMessages.forEach(function(messageElement) {
+            //getting the dataset value from the element
+            const createdAtString = messageElement.dataset.createdAt;
+            if (createdAtString!=='None'){
+                //Formating the date that we got to a date understandable by JS
+                const formattedDate = parseDate(createdAtString);
+                console.log(formattedDate);
+                //Creating a new Date Object for the time we want to update
+                const parsedDate = new Date(formattedDate).getTime();
+                //Creating a new date object for the current Time
+                const currentTime = new Date().getTime();
+
+                function updateTimeDisplay() {
+                    const currentTime = new Date().getTime();
+                    // console.log('currentTime :',currentTime)
+                    // console.log('parsedDate :',parsedDate)
+                    var timeDifference = currentTime - parsedDate;
+                    // console.log('timeDifference :',timeDifference)
+
+
+                    const elapsedMinutes = Math.floor(timeDifference / (1000 * 60));
+                    const elapsedHours = Math.floor(elapsedMinutes / 60);
+                    const elapsedDays = Math.floor(elapsedHours / 24);
+                    if (elapsedDays >= 1) {
+                        messageElement.textContent = elapsedDays + ' day' + (elapsedDays > 1 ? 's' : '') + ' ago';
+                    } else if (elapsedHours >= 1) {
+                        messageElement.textContent = elapsedHours + ' hour' + (elapsedHours > 1 ? 's' : '') + ' ago';
+                    } else {
+                        messageElement.textContent = elapsedMinutes + ' minute' + (elapsedMinutes !== 1 ? 's' : '') + ' ago';
+                    }
+                }
+                updateTimeDisplay();
+            }
+            });
+    }
+    function resizeText() {
+        const elementsToResize = document.querySelectorAll('.textToResize');
+        
+        elementsToResize.forEach(element => {
+            const maxLength = 27; // Set the maximum length before truncation
+            let text = element.textContent.trim();
+        
+            // Check if the text exceeds the maximum length
+            if (text.length > maxLength) {
+            // Truncate the text and add ellipsis
+            text = text.slice(0, maxLength) + '...';
+            }
+        
+            // Set the modified text content
+            element.textContent = text;
+            // Add additional resizing logic if needed (e.g., adjusting font size)
+            // element.style.fontSize = '16px'; // Example of changing font size
+        });
+    }
+    resizeText();
+    updateTimeForMessages('.time_of_messages');
+    updateTimeForMessages('.time_of_messages_group');
+    setInterval(function() {
+            console.log("triggered");
+            updateTimeForMessages('.time_of_messages');
+            updateTimeForMessages('.time_of_messages_group');
+            }, 60 * 1000);
+
+</script>
+{% endblock %}

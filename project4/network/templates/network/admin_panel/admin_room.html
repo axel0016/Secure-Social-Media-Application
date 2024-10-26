@@ -1,0 +1,60 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+<div class="main-div" style="width: 78.2%;">
+  <h1>Rooms</h1>
+    <table class="table table-striped" >
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Room ID</th>
+            <th scope="col">Participants</th>
+            <th scope="col">Created At</th>
+            <th scope="col">Group Chat / Disscussion</th> {% comment %}  ---------this----------- {% endcomment %}
+            <th scope ="col">Group Chat Name</th> {% comment %}  ---------this----------- {% endcomment %}
+            <th scope ="col">Group Chat Picture</th> {% comment %}  ---------this----------- {% endcomment %}
+            <th scope="col">Action <a href="{% url 'add_room' %}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="green" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+              </svg>
+            </a></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for room in rooms %}
+          <tr>
+            <th scope="row">{{ room.id }}</th>
+            <td>{{ room.room_id }}</td>
+            <td>
+                {% for participant in room.participants.all %}
+                    {{ participant.username }}
+                    {% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+            <td>{% if room.isGroupChat %} Group Chat {%else %} Discussion {%endif%}</td> {% comment %}  ---------this----------- {% endcomment %}
+            <td>{% if room.isGroupChat %} {{room.room_name}} {%else%} / {%endif%}</td> {% comment %}  ---------this----------- {% endcomment %}
+            <td>{% if room.isGroupChat %} {{room.room_picture}} {%else%} /  {%endif%}</td> {% comment %}  ---------this----------- {% endcomment %}
+            <td>{{ room.created_at }}</td>
+            <td class="d-flex justify-content-between align-items-center w-25">
+                <a class="mr-2" href="#" onclick="confirmDelete({{ room.id }})"><i class="fas fa-trash fa-lg" style="color: #d1102d;"></i></a>
+                  <a href="{% url 'edit_room' room.id %}"><i class="far fa-edit fa-lg" style="color: #0088f0;"></i></a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% block right_ %}
+    {% endblock %}
+    <script>
+      function confirmDelete(roomId) {
+        if (roomId !== undefined && roomId !== null) {
+          var result = confirm("Are you sure you want to delete this room?");
+          if (result) {
+            window.location.href = `delete/room/${roomId}/`; 
+          }
+        }
+      }
+    </script>
+{% endblock %}

@@ -1,0 +1,184 @@
+{% extends "network/layout.html" %}
+{% load static %}
+{% block body %}
+
+  <style>
+   
+    .main-div {
+      
+      width: 78.2%;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+
+     .navigation {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+  }
+
+  .navigation li {
+    margin-bottom: 10px;
+    background-color: #ebebeb;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+  }
+
+  .navigation a {
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    align-items: center;
+  }
+
+  .icon {
+    background-color: white;
+    padding: 5px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+    .navbar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #28a745;
+      color: white;
+      height: 50px; /* Adjust the height as needed */
+      border-radius: 6px;
+    }
+
+ .stato {
+    margin: 30px 0 ;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    width: 100%;
+    flex-wrap: nowrap; /* Prevent wrapping */
+  }
+
+  .sd {
+    background-color: #f0f0f0;
+    text-align: center;
+    padding:5px 10px;
+    border: 1px solid #e0dede;
+    border-radius: 10px;
+    flex: 1;
+    min-width: 150px; /* Set a minimum width for each sd */
+  }
+  .d {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+    background-color: rgb(255, 255, 255);
+    border-radius: 6px;
+  }
+
+  .sd h2:nth-child(2) {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  </style>
+
+
+<div class="main-div">
+  <div class="navbar">
+    <div class="center-text">
+      <!-- Centered text -->
+      Administration
+    </div>
+  </div>
+<div class="stato">
+<div class="sd"> <h2>users</h2> <h2 class="d">{{nbuser}}</h2></div>
+<div class="sd"><h2>comments</h2>
+<h2 class="d">{{nbcom}}</h2></div>
+<div class="sd"><h2>posts</h2>
+<h2 class="d">{{nbpos}}</h2></div>
+<div class="sd"><h2>rooms</h2>
+<h2 class="d">{{nbro}}</h2></div>
+</div>
+
+  <ul class="navigation">
+    <li>
+      <a href="{% url 'admin_user' %}">
+        Utilisateurs</a>
+      <a href="{% url 'add_user' %}" class="icon-link">
+        <svg class="icon" width="24" height="24" viewBox="0 0 24 24">
+          <!-- Plus icon -->
+          <path fill="green"
+            d="M12 2c.4 0 .7.3.7.7v8.6h8.6c.4 0 .7.3.7.7s-.3.7-.7.7h-8.6v8.6c0 .4-.3.7-.7.7s-.7-.3-.7-.7v-8.6h-8.6c-.4 0-.7-.3-.7-.7s.3-.7.7-.7h8.6v-8.6c0-.4.3-.7.7-.7z">
+          </path>
+        </svg>
+      </a>
+    </li>
+    
+    <li><a href="{% url 'admin_comment' %}" class="icon-link">Comments</a>
+      <a href="{% url 'add_comment' %}" class="icon-link">
+        <svg class="icon" width="24" height="24" viewBox="0 0 24 24">
+          <!-- Plus icon -->
+          <path fill="green"
+            d="M12 2c.4 0 .7.3.7.7v8.6h8.6c.4 0 .7.3.7.7s-.3.7-.7.7h-8.6v8.6c0 .4-.3.7-.7.7s-.7-.3-.7-.7v-8.6h-8.6c-.4 0-.7-.3-.7-.7s.3-.7.7-.7h8.6v-8.6c0-.4.3-.7.7-.7z">
+          </path>
+        </svg>
+      </a>
+    </li>
+    <li><a href="{% url 'admin_room' %}"  class="icon-link">Rooms</a>
+      <a href="{% url 'add_room' %}" class="icon-link">
+        <svg class="icon" width="24" height="24" viewBox="0 0 24 24">
+          <!-- Plus icon -->
+          <path fill="green"
+            d="M12 2c.4 0 .7.3.7.7v8.6h8.6c.4 0 .7.3.7.7s-.3.7-.7.7h-8.6v8.6c0 .4-.3.7-.7.7s-.7-.3-.7-.7v-8.6h-8.6c-.4 0-.7-.3-.7-.7s.3-.7.7-.7h8.6v-8.6c0-.4.3-.7.7-.7z">
+          </path>
+        </svg>
+      </a></li>
+    <li><a href="{% url 'admin_post' %}" class="icon-link">Posts</a>
+      <a href="{% url 'add_post' %}" class="icon-link">
+        <svg class="icon" width="24" height="24" viewBox="0 0 24 24">
+          <!-- Plus icon -->
+          <path fill="green"
+            d="M12 2c.4 0 .7.3.7.7v8.6h8.6c.4 0 .7.3.7.7s-.3.7-.7.7h-8.6v8.6c0 .4-.3.7-.7.7s-.7-.3-.7-.7v-8.6h-8.6c-.4 0-.7-.3-.7-.7s.3-.7.7-.7h8.6v-8.6c0-.4.3-.7.7-.7z">
+          </path>
+        </svg>
+      </a></li>
+
+      <li><a href="{% url 'admin_message' %}" class="icon-link">Messages</a>
+        <a href="{% url 'add_message' %}" class="icon-link">
+          <svg class="icon" width="24" height="24" viewBox="0 0 24 24">
+            <!-- Plus icon -->
+            <path fill="green"
+              d="M12 2c.4 0 .7.3.7.7v8.6h8.6c.4 0 .7.3.7.7s-.3.7-.7.7h-8.6v8.6c0 .4-.3.7-.7.7s-.7-.3-.7-.7v-8.6h-8.6c-.4 0-.7-.3-.7-.7s.3-.7.7-.7h8.6v-8.6c0-.4.3-.7.7-.7z">
+            </path>
+          </svg>
+        </a></li>
+  </ul>
+</div>
+
+{% block right_ %}
+{% endblock %}
+
+{% endblock %}
+<script>
+  function confirmDelete(userId) {
+    if (userId !== undefined && userId !== null) {
+      var result = confirm("Are you sure you want to delete this user?");
+      if (result) {
+        // Use the template tag directly in the script block
+        window.location.href = `/delete/user/${userId}/`;  // Assuming your URL pattern is like this
+      }
+    }
+  }
+</script>
+
+
+</html>
+
+
+<li><a href="{% url 'admin_user' %}">Utilisateurs</a></li>
+    <li><a href="{% url 'admin_post' %}">Posts</a></li>
+    <li><a href="{% url 'admin_comment' %}">Comments</a></li>

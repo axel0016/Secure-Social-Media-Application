@@ -1,0 +1,70 @@
+
+
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+<div class="main-div" style="width: 78.2%;">
+ 
+
+  <form method="post" enctype="multipart/form-data" class="d-flex flex-column justify-content-center p-5" action="{% url 'add_user' %}">
+    <h1>Add user</h1>
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="exampleInputEmail1" class="form-label">Username</label>
+        <input type="text" class="form-control"  name="username">
+      </div>
+    <div class="mb-3">
+        <label for="exampleInputEmail1" class="form-label">first name</label>
+        <input type="text" class="form-control"  name="first">
+      </div>
+      <div class="mb-3">
+        <label for="exampleInputEmail1" class="form-label">last name</label>
+        <input type="text" class="form-control"  name="last">
+      </div>
+    <div class="mb-3">
+      <label for="exampleInputEmail1" class="form-label">Email address</label>
+      <input type="email" class="form-control"  name="email">
+    </div>
+    <div class="mb-3">
+      <label for="formFile" class="form-label">profile picture</label>
+      <input class="form-control" type="file" id="profile" name="profile" accept="image/jpeg,image/png,image/webp,image/gif" data-focusable="true" aria-describedby="inputGroupFileAddon01">
+    </div>
+    <div class="mb-3">
+      <label for="formFile" class="form-label">cover picture</label>
+      <input class="form-control" type="file" id="cover" name="cover" accept="image/jpeg,image/png,image/webp,image/gif" data-focusable="true" aria-describedby="inputGroupFileAddon01">
+    </div>
+    <div class="mb-3">
+      <label for="exampleInputEmail1" class="form-label">Groups (leave empty if user):</label>
+      <select class="form-select" name="groups" multiple>
+          {% for group in all_groups %}
+              <option value="{{ group.id }}">{{ group.name }}</option>
+          {% endfor %}
+      </select>
+  </div>
+    <div class="mb-3">
+      <label for="exampleInputPassword1" class="form-label">Password</label>
+      <input type="password" class="form-control" name="password">
+    </div>
+    <div class="mb-3">
+        <label for="exampleInputPassword1" class="form-label">Confirm password</label>
+        <input type="password" class="form-control" name="confirm">
+      </div>
+    
+    <button type="submit" class="btn btn-primary">create user</button>
+  </form>
+
+
+</div>
+{% block right_ %}
+{% endblock %}
+
+{% endblock %}
+
+
+</html>
+
+
+
+
+

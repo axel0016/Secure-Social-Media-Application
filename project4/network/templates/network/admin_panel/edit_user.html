@@ -1,0 +1,70 @@
+
+
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+<div class="main-div" style="width: 78.2%;">
+    <form method="post" enctype="multipart/form-data" class="d-flex flex-column justify-content-center p-5">
+        <h1>Edit user</h1>
+        {% csrf_token %}
+    
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Username</label>
+            <input type="text" class="form-control" name="username" value="{{ form.username }}">
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">First Name</label>
+            <input type="text" class="form-control" name="first" value="{{ form.first_name}}">
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Last Name</label>
+            <input type="text" class="form-control" name="last" value="{{ form.last_name }}">
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Email address</label>
+            <input type="email" class="form-control" name="email" value="{{ form.email }}">
+        </div>
+        <div class="mb-3">
+            <label for="formFile" class="form-label">profile picture</label>
+            <input class="form-control" type="file" id="formFile" name="profile" value="{{ form.profile_pic }}">
+          </div>
+          <div class="mb-3">
+            <label for="formFile" class="form-label">cover picture</label>
+            <input class="form-control" type="file" id="formFile" name="cover" value="{{ form.cover }}">
+          </div>
+          <div>
+            <label for="groups">Groups (leave empty if user):</label>
+            <select name="groups" multiple>
+              {% for group in available_groups %}
+                <option value="{{ group.id }}" {% if group in selected_groups %}selected{% endif %}>{{ group.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        
+        <div class="mb-3">
+            <label for="exampleInputPassword1" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password">
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputPassword1" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" name="confirm">
+        </div>
+        {{message_err}}
+        <button type="submit" class="btn btn-primary">Update User</button>
+    </form>
+    
+
+
+</div>
+{% block right_ %}
+{% endblock %}
+
+{% endblock %}
+
+
+</html>
+
+
+
+

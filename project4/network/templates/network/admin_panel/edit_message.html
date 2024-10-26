@@ -1,0 +1,26 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+{% load widget_tweaks %}
+<div class="main-div" style="width: 78.2%;">
+
+  <form method="post" class="d-flex flex-column justify-content-center p-5" enctype="multipart/form-data">
+    <h1>Edit message</h1>
+    {% csrf_token %}
+    {% for field in form.visible_fields %}
+                <div class="form-group">
+                {{ field.label_tag }}
+                {% render_field field class="form-control" %}
+                </div>
+            {% endfor %}
+
+
+    <button type="submit" class="btn btn-primary">Update Message</button>
+  </form>
+</div>
+
+{% block right_ %}
+{% endblock %}
+
+{% endblock %}
