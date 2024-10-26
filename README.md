@@ -1,6 +1,6 @@
 # Secure Social Media Application
 
-## Description
+## Description 
 This project is a social media application designed with a strong emphasis on security. Implementing various security concepts, it aims to provide a safe and reliable platform for users to connect and share content. Key security features include:
 
 - **Honeypots**: Utilized to detect and analyze potential attacks, providing insights into malicious activities and enhancing overall security.
