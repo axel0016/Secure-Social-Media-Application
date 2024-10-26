@@ -14,7 +14,7 @@ This project is a social media application designed with a strong emphasis on se
 This project serves as a comprehensive example of integrating security practices into web applications, making it an ideal reference for developers interested in building secure systems.
 
 ## Features
-- User authentication and authorization
+- User authentication and authorization 
 - Profile management
 - Real-time chat functionality
 - Secure email notifications
